@@ -1,7 +1,7 @@
 # Object files
 *.o
 *.ko
-*.obj
+#*.obj
 *.elf
 
 # Precompiled Headers
@@ -27,3 +27,16 @@
 *.i*86
 *.x86_64
 *.hex
+
+# Visual C++ cache files
+ipch/
+*.aps
+*.ncb
+*.opensdf
+*.sdf
+*.cachefile
+
+# 
+*.tlog
+*.idb
+Debug/
