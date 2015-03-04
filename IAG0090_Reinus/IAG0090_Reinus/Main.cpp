@@ -10,6 +10,7 @@
 
 void PrintObjects(HeaderA *pStruct2); 
 int InsertNewObject(HeaderA **pStruct2, char *pNewID, int NewCode);
+Object3* RemoveExistingObject(HeaderA **pStruct2, char *pExistingID); 
 
 // helpers
 bool IsUniqueIdentifier(HeaderA **pStruct2, char *pNewID);
@@ -23,22 +24,58 @@ int main()
 	HeaderA *header = GetStruct2(3, 2);
 	PrintObjects(header);
 
-	InsertNewObject(&header, "AAndr", 3);
-	InsertNewObject(&header, "AAnde", 4);
+	char *pNewCode = "AAndr";
+
+	InsertNewObject(&header, pNewCode, 3);
+	/*InsertNewObject(&header, "AAnde", 4);
 	InsertNewObject(&header, "PAnde", 4);
+	*/
+	Object3 *removed = RemoveExistingObject(&header, pNewCode);
 	PrintObjects(header);
-
-	// 1. Uus objekt tuleb juba olemasolevasse ahelloendisse. 
-	// 2. Ahelloendit uue objekti jaoks (ja seega ka temale vastavat HeaderA tüüpi sidujat) siiamaani ei olnud:
-		// a. Uus siduja tuleb HeaderA ahelloendis kõige esimeseks.
-		// b. Uus siduja tuleb HeaderA ahelloendis kõige viimaseks.
-		// c. Uus siduja tuleb HeaderA ahelloendis kusagile keskele. 
-
-
+	
+	if (removed != NULL) {
+		printf("%s\n\r", removed->pID);
+	}
 	printf("--Done--\n\r");
 	getchar();
 	return 0;
 }
+
+Object3* RemoveExistingObject(HeaderA **pStruct2, char *pExistingID) {
+	HeaderA *pCurrentHeader, *pPreviousHeader = NULL;
+	Object3 *pCurrentObject, *pPreviousObject = NULL;
+	
+	for (pCurrentHeader = *pStruct2; pCurrentHeader ; pPreviousHeader = pCurrentHeader, pCurrentHeader = pCurrentHeader->pNext)
+	{
+		if (pCurrentHeader->cBegin != *pExistingID)
+		{
+			continue;
+		}
+
+		for (pCurrentObject = (Object3 *)pCurrentHeader->pObject; pCurrentObject; pPreviousObject = pCurrentObject, pCurrentObject = pCurrentObject->pNext) {
+			if (strcmp(pCurrentObject->pID, pExistingID) != 0) {
+				continue;
+			}
+
+			// Eemaldatav objekt paikneb ahelloendis, kus on rohkem kui üks lüli:
+			//	a. Eemaldatav objekt on oma ahelloendis esimene.
+			//	b. Eemaldatav objekt on oma ahelloendis viimane.
+			//	c. Eemaldatav objekt on oma ahelloendis kusagil keskel.
+			
+			// Eemaldatav objekt on oma ahelloendis ainukene:
+			//	a. Kustutatav siduja on HeaderA ahelloendis kõige esimene.
+			if (pPreviousObject == NULL) {
+			}
+			
+			//	b. Kustutatav siduja on HeaderA ahelloendis kõige viimane.
+			//	c. Kustutatav siduja on HeaderA ahelloendis kusagil keskel. 
+
+		}
+	}
+
+	return NULL;
+}
+
 
 void PrintObjects(HeaderA *pStruct2) {
 	HeaderA *pItem;
@@ -57,12 +94,10 @@ int InsertNewObject(HeaderA **pStruct2, char *pNewID, int NewCode) {
 		return 0;
 	}
 
-	// Unikaalsuse kontroll
 	if (!IsUniqueIdentifier(pStruct2, pNewID)) {
 		return 0;
 	}
 
-	// Lisamine
 	Object3 *pNewObject = CreateObject(pNewID, NewCode);
 
 	HeaderA *p;
@@ -71,14 +106,12 @@ int InsertNewObject(HeaderA **pStruct2, char *pNewID, int NewCode) {
 	{
 		if (p->cBegin == *pNewID)
 		{
-			// 6ige header eksisteerib
-			headerFound = true;;
+			headerFound = true;
 		}
 	}
 
 	if (!headerFound)
 	{
-		// ei leitud seda headerit, tekitatakse, lisatakse 6igele kohale
 		HeaderA *newHeader = (HeaderA *)malloc(sizeof(HeaderA));
 		newHeader->cBegin = *pNewID;
 		newHeader->pNext = NULL;
