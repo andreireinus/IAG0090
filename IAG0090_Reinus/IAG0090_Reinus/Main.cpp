@@ -9,33 +9,36 @@
 #include "Structs.h"
 
 void PrintObjects(HeaderA *pStruct2); 
+
 int InsertNewObject(HeaderA **pStruct2, char *pNewID, int NewCode);
 Object3* RemoveExistingObject(HeaderA **pStruct2, char *pExistingID); 
 
 // helpers
 bool IsUniqueIdentifier(HeaderA **pStruct2, char *pNewID);
 Object3 *CreateObject(char *pNewID, int NewCode);
+void PrintObjects(HeaderA *pStruct2, char *pText); 
 
 #pragma warning ( disable : 4996 )
 
 
 int main()
-{ 
-	HeaderA *header = GetStruct2(3, 2);
-	PrintObjects(header);
+{
+	HeaderA *header = GetStruct2(3, 10);
 
-	char *pNewCode = "AAndr";
+	PrintObjects(header, "Algseis");
 
-	InsertNewObject(&header, pNewCode, 3);
-	/*InsertNewObject(&header, "AAnde", 4);
-	InsertNewObject(&header, "PAnde", 4);
-	*/
-	Object3 *removed = RemoveExistingObject(&header, pNewCode);
-	PrintObjects(header);
+	InsertNewObject(&header, "Andre", 3);
+	InsertNewObject(&header, "Andre", 3);
+	PrintObjects(header, "Peale lisamist");
+
+
+	Object3 *removed = RemoveExistingObject(&header, "Andre");
+	PrintObjects(header, "Peale eemaldamist");
 	
 	if (removed != NULL) {
 		printf("%s\n\r", removed->pID);
 	}
+	
 	printf("--Done--\n\r");
 	getchar();
 	return 0;
@@ -59,17 +62,31 @@ Object3* RemoveExistingObject(HeaderA **pStruct2, char *pExistingID) {
 
 			// Eemaldatav objekt paikneb ahelloendis, kus on rohkem kui üks lüli:
 			//	a. Eemaldatav objekt on oma ahelloendis esimene.
-			//	b. Eemaldatav objekt on oma ahelloendis viimane.
-			//	c. Eemaldatav objekt on oma ahelloendis kusagil keskel.
-			
-			// Eemaldatav objekt on oma ahelloendis ainukene:
-			//	a. Kustutatav siduja on HeaderA ahelloendis kõige esimene.
 			if (pPreviousObject == NULL) {
+				pCurrentHeader->pObject = pCurrentObject->pNext;
+			} else {
+				//	b. Eemaldatav objekt on oma ahelloendis viimane.
+				//	c. Eemaldatav objekt on oma ahelloendis kusagil keskel.
+				pPreviousObject->pNext = pCurrentObject->pNext;
+			}
+
+			// Eemaldatav objekt on oma ahelloendis ainukene:
+			if (pCurrentHeader->pObject == NULL) {
+
+				//	a. Kustutatav siduja on HeaderA ahelloendis kõige esimene.
+				if (pPreviousHeader == NULL) { 
+					*pStruct2 = pCurrentHeader->pNext;
+				} else {
+					//	b. Kustutatav siduja on HeaderA ahelloendis kõige viimane.
+					//	c. Kustutatav siduja on HeaderA ahelloendis kusagil keskel. 
+
+					pPreviousHeader->pNext = pCurrentHeader->pNext;
+				}
+
+				free(pCurrentHeader);
 			}
 			
-			//	b. Kustutatav siduja on HeaderA ahelloendis kõige viimane.
-			//	c. Kustutatav siduja on HeaderA ahelloendis kusagil keskel. 
-
+			return pCurrentObject;
 		}
 	}
 
@@ -88,6 +105,7 @@ void PrintObjects(HeaderA *pStruct2) {
 		}
 	}
 }
+
 
 int InsertNewObject(HeaderA **pStruct2, char *pNewID, int NewCode) {
 	if (strchr("ABCDEFGHIJKLMNOPQRSTUWVXYZ", *pNewID) == 0) {
@@ -145,8 +163,12 @@ int InsertNewObject(HeaderA **pStruct2, char *pNewID, int NewCode) {
 		}
 		else
 		{
-			// L2heb viimaseks
-			l->pNext = newHeader;
+			if (l == NULL) {
+				*pStruct2 = newHeader;
+			} else {
+				// L2heb viimaseks
+				l->pNext = newHeader;
+			}
 		}
 	}
 
@@ -163,6 +185,8 @@ int InsertNewObject(HeaderA **pStruct2, char *pNewID, int NewCode) {
 				pNewObject->pNext = (Object3 *)p->pObject;
 				p->pObject = pNewObject;
 			}
+
+			break;
 		}
 	}
 
@@ -184,7 +208,7 @@ bool IsUniqueIdentifier(HeaderA **pStruct2, char *pNewID) {
 
 		for (o = (Object3 *)p->pObject; o; o = o->pNext)
 		{
-			if (o->pID == pNewID)
+			if (strcmp(o->pID, pNewID) == 0)
 			{
 				return false;
 			}
@@ -211,4 +235,10 @@ Object3 *CreateObject(char *pNewID, int NewCode)
 	newObject->sTime1 = *time;
 
 	return newObject;
+}
+
+void PrintObjects(HeaderA *pStruct2, char *pText) {
+	printf("--- %s ---\n", pText);
+	PrintObjects(pStruct2);
+	printf("\n\n");
 }
